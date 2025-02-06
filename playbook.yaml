@@ -1,0 +1,56 @@
+- name: Install Promtail and run it as a Docker container
+  hosts: server01
+  become: true   
+  tasks:
+    - name: Install needed packages
+      apt:
+        name: 
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+        update_cache: yes
+
+    - name: Add Docker official GPG key #this is for Ubuntu. modify in case of other linux distros
+      shell: |
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+    - name: Set up Docker repository
+      shell: |
+        echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+    - name: Install Docker
+      apt:
+        name: docker-ce
+        state: present
+        update_cache: yes
+
+    - name: Start and enable Docker
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Create Promtail configuration directory
+      file:
+        path: /etc/promtail
+        state: directory
+        mode: '0755'
+
+    - name: Copy Promtail config file
+      copy:
+        src: ./promtail-config.yaml
+        dest: /etc/promtail/promtail-config.yaml
+        mode: '0644'
+
+    - name: Run Promtail container
+      docker_container:
+        name: promtail
+        image: grafana/promtail:latest
+        state: started
+        restart_policy: always
+        volumes:
+          - "/etc/promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml"
+          - "/var/log:/var/log"
+        command: -config.file=/etc/promtail/promtail-config.yaml
