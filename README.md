@@ -1,5 +1,5 @@
 # ansible-promtail
-This setup automates the process of configuring your server to send logs to Grafana Loki server using Ansible.
+This setup automates the process of configuring your server to send logs to Grafana Loki server using Ansible for real-time logging.
 
 ****Steps:****\
 1- Install Ansible.\
