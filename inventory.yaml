@@ -1,0 +1,6 @@
+myhosts:
+  hosts:
+    server01:
+      ansible_host: <target-IP>
+      ansible_user: azureuser
+      ansible_ssh_private_key_file: ~/.ssh/id_rsa #modify with your ssh key path
